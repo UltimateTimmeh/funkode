@@ -10,7 +10,7 @@ First, clone the git repository:
 git clone https://www.github.com/UltimateTimmeh/funkode <FUNKODE_ROOT>
 ```
 
-Next, set up the virtual environment and install Funkode as a package in editable mode:
+Next, set up the virtual environment and install FunKode as a package in editable mode:
 
 ```bash
 cd <FUNKODE_ROOT>
@@ -24,7 +24,10 @@ python -m pip install -e .
 ### Mandelbrot Viewer
 
 Interactively explore the wonderful fractals of the Mandelbrot set. Move around, zoom in/out
-and take screenshots with different color palettes.
+and take screenshots with different color palettes. For example:
+
+![Mandelbrot set with GRAYSCALE palette](screenshots/mandelbrot_viewer_0.png)
+![Zoomed in Mandelbrot set with FIRE palette](screenshots/mandelbrot_viewer_1.png)
 
 Launch with the following command:
 
@@ -36,9 +39,9 @@ mandelbrot
 
 Here are some ideas for topics to explore in the future:
 
-- Ray Casting - Cast some rays, hit some walls.
-- 3D Rendering with ray casting - To create Doom-like scenarios (the game).
-- Smart Rockets - Genetic algorithm in which rockets automatically learn to hit a target.
-- Mandelbulb - This groovy 3D object first requires exploring the following:
-  - Signed Distance Functions
-  - Ray Marching
+- **Ray Casting** - Cast some rays, hit some walls.
+- **3D Rendering with ray casting** - To create Doom-like scenarios (the game).
+- **Smart Rockets** - Genetic algorithm in which rockets automatically learn to hit a target.
+- **Mandelbulb** - This groovy 3D object first requires exploring the following:
+  - *Signed Distance Functions*
+  - *Ray Marching*

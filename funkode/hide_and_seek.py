@@ -1,4 +1,4 @@
-"""Play around with ray casting."""
+"""A simple hide and seek game which uses ray casting."""
 import numpy as np
 import pygame
 
@@ -73,7 +73,7 @@ class Character(funkode.raycasting.RayCaster):
             super().draw(screen)
 
 
-class RaycastingScene(funkode.scene.Scene):
+class HideAndSeekScene(funkode.scene.Scene):
     """The ray casting scene."""
 
     def __init__(self):
@@ -232,7 +232,6 @@ class RaycastingScene(funkode.scene.Scene):
             self.scene_running = False
 
 
-
 def main():
     """Main script execution function."""
     # Initialize some PyGame stuff.
@@ -241,7 +240,7 @@ def main():
     pygame.display.set_caption("Hide and Seek")
 
     # Set up the scene.
-    scene = RaycastingScene()
+    scene = HideAndSeekScene()
     # Initialize and run the game.
     game = funkode.scene.SceneContext(scene, FRAMERATE)
     game.run(screen)

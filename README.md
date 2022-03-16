@@ -35,11 +35,37 @@ Launch with the following command:
 mandelbrot
 ```
 
+### Ray Casting
+
+Move the mouse and watch as rays are emitted from it and stop at the first randomly generated
+wall they encounter.
+
+![Ray Casting](screenshots/ray_casting_0.png)
+
+Launch with the following command:
+
+```bash
+raycasting
+```
+
+### Hide and Seek
+
+A simple game which uses the ray casting module. Move around the randomly generated levels
+and try to find the enemy before the enemy finds you.
+
+![Hide and Seek - You Won!](screenshots/hide_and_seek_0.png)
+![Hide and Seek - You Lost!](screenshots/hide_and_seek_1.png)
+
+Launch with the following command:
+
+```bash
+hide-and-seek
+```
+
 ## Ideas for future fun
 
 Here are some ideas for topics to explore in the future:
 
-- **Ray Casting** - Cast some rays, hit some walls.
 - **3D Rendering with ray casting** - To create Doom-like scenarios (the game).
 - **Smart Rockets** - Genetic algorithm in which rockets automatically learn to hit a target.
 - **Mandelbulb** - This groovy 3D object first requires exploring the following:

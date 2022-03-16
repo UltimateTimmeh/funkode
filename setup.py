@@ -35,6 +35,7 @@ setuptools.setup(
     entry_points = {
               "console_scripts": [
                   "mandelbrot = funkode.mandelbrot:main",
+                  "raycasting = funkode.raycasting:main",
               ],
           },
     install_requires=requirements,

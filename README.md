@@ -35,6 +35,19 @@ Launch with the following command:
 mandelbrot
 ```
 
+### Ray Casting
+
+Move the mouse and watch as rays are emitted from it and stop at the first randomly generated
+wall they encounter.
+
+![Ray Casting](screenshots/ray_casting_0.png)
+
+Launch with the following command:
+
+```bash
+raycasting
+```
+
 ## Ideas for future fun
 
 Here are some ideas for topics to explore in the future:

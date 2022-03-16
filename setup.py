@@ -36,6 +36,7 @@ setuptools.setup(
               "console_scripts": [
                   "mandelbrot = funkode.mandelbrot:main",
                   "raycasting = funkode.raycasting:main",
+                  "hide-and-seek = funkode.hide_and_seek:main",
               ],
           },
     install_requires=requirements,

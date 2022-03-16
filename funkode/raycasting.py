@@ -29,14 +29,14 @@ WALL_THICKNESS = 3
 AMOUNT_OF_WALLS = 10
 
 
-def random_point():
+def random_point(screen_size):
     """Return a random point on the screen.
 
     Returns:
         np.array: The 2D coordinates of a random point on the screen.
 
     """
-    return np.round(np.random.rand(2)*SCREEN_SIZE)
+    return np.round(np.random.rand(2)*screen_size)
 
 
 class RayCaster:
@@ -187,7 +187,7 @@ class RaycastingScene(funkode.scene.Scene):
     def refresh_walls(self):
         self.walls = []
         for _ in range(AMOUNT_OF_WALLS):
-            wall = Wall(random_point(), random_point(),
+            wall = Wall(random_point(SCREEN_SIZE), random_point(SCREEN_SIZE),
                         WALL_COLOR, WALL_THICKNESS)
             self.walls.append(wall)
         self.walls += [

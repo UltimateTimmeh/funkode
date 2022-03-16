@@ -16,13 +16,13 @@ CORNERS = {
 
 DEGREES = np.pi/180.
 
-EMITTER_FOV = 360*DEGREES
-EMITTER_NRAYS = 100
-EMITTER_COLOR = pygame.Color("white")
-EMITTER_SIZE = 5
-EMITTER_RAY_THICKNESS = 1
-EMITTER_VISION_RAYS = True
-EMITTER_VISION_POLYGON = False
+RAYCASTER_FOV = 360*DEGREES
+RAYCASTER_NRAYS = 100
+RAYCASTER_COLOR = pygame.Color("white")
+RAYCASTER_SIZE = 5
+RAYCASTER_RAY_THICKNESS = 1
+RAYCASTER_VISION_RAYS = True
+RAYCASTER_VISION_POLYGON = False
 
 WALL_COLOR = pygame.Color("white")
 WALL_THICKNESS = 3
@@ -39,7 +39,7 @@ def random_point():
     return np.round(np.random.rand(2)*SCREEN_SIZE)
 
 
-class RayEmitter:
+class RayCaster:
     """An entity in the scene which emits rays in a certain field of view."""
 
     def __init__(self, position, angle, field_of_view, number_of_rays, color,
@@ -57,7 +57,7 @@ class RayEmitter:
 
     @property
     def polygon_points(self):
-        """Return the emitter's ray polygon points."""
+        """Return the points of the ray caster's visible polygon area."""
         points = None
         if self.rays is not None:
             position = self.position.reshape(-1, 2)
@@ -79,11 +79,11 @@ class RayEmitter:
                 for ray in self.rays:
                     pygame.draw.line(screen, self.color, ray[0], ray[1],
                                      self.ray_thickness)
-        # Draw the emitter.
+        # Draw the ray caster.
         pygame.draw.circle(screen, self.color, self.position, self.size)
 
     def cast_to(self, walls):
-        """Have the emitter cast rays to a list of walls."""
+        """Have the ray caster cast rays to a list of walls."""
         # The array of arc angles.
         arc_start = self.angle - self.field_of_view/2
         arc_stop = self.angle + self.field_of_view/2
@@ -130,7 +130,7 @@ class RayEmitter:
         self.rays = self.rays.reshape(self.number_of_rays, 2, 2)
 
     def sees_point(self, point):
-        """Return whether the emitter can see a point."""
+        """Return whether the ray caster can see a point."""
         visible = None
         if self.polygon_points is not None:
             polygon = shapely.geometry.Polygon(self.polygon_points)
@@ -155,16 +155,16 @@ class RaycastingScene(funkode.scene.Scene):
     """The ray casting scene."""
 
     def __init__(self):
-        self.emitter = RayEmitter(
+        self.raycaster = RayCaster(
             position=np.array(SCREEN_SIZE)/2,
             angle=0.,
-            field_of_view=EMITTER_FOV,
-            number_of_rays=EMITTER_NRAYS,
-            color=EMITTER_COLOR,
-            size=EMITTER_SIZE,
-            ray_thickness=EMITTER_RAY_THICKNESS,
-            draw_rays=EMITTER_VISION_RAYS,
-            draw_polygon=EMITTER_VISION_POLYGON,
+            field_of_view=RAYCASTER_FOV,
+            number_of_rays=RAYCASTER_NRAYS,
+            color=RAYCASTER_COLOR,
+            size=RAYCASTER_SIZE,
+            ray_thickness=RAYCASTER_RAY_THICKNESS,
+            draw_rays=RAYCASTER_VISION_RAYS,
+            draw_polygon=RAYCASTER_VISION_POLYGON,
         )
         self.walls = []
         self.refresh_walls()
@@ -175,12 +175,12 @@ class RaycastingScene(funkode.scene.Scene):
                 self.refresh_walls()
 
     def update(self):
-        self.emitter.position = np.array(pygame.mouse.get_pos())
-        self.emitter.update(self.walls)
+        self.raycaster.position = np.array(pygame.mouse.get_pos())
+        self.raycaster.update(self.walls)
 
     def draw(self, screen):
         screen.fill(pygame.Color("black"))
-        self.emitter.draw(screen)
+        self.raycaster.draw(screen)
         for wall in self.walls:
             wall.draw(screen)
 

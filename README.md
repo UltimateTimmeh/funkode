@@ -52,7 +52,6 @@ raycasting
 
 Here are some ideas for topics to explore in the future:
 
-- **Ray Casting** - Cast some rays, hit some walls.
 - **3D Rendering with ray casting** - To create Doom-like scenarios (the game).
 - **Smart Rockets** - Genetic algorithm in which rockets automatically learn to hit a target.
 - **Mandelbulb** - This groovy 3D object first requires exploring the following:

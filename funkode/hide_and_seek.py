@@ -74,7 +74,7 @@ class Character(funkode.raycasting.RayCaster):
 
 
 class HideAndSeekScene(funkode.scene.Scene):
-    """The ray casting scene."""
+    """The hide and seek scene."""
 
     def __init__(self):
         self.player = Character(

@@ -32,6 +32,9 @@ AMOUNT_OF_WALLS = 10
 def random_point(screen_size):
     """Return a random point on the screen.
 
+    Args:
+        screen_size (tuple[int]): The screen size as a (width, height) tuple.
+
     Returns:
         np.array: The 2D coordinates of a random point on the screen.
 
@@ -40,10 +43,38 @@ def random_point(screen_size):
 
 
 class RayCaster:
-    """An entity in the scene which emits rays in a certain field of view."""
+    """An entity in the scene which emits rays in a certain field of view.
 
-    def __init__(self, position, angle, field_of_view, number_of_rays, color,
-                 size, ray_thickness, draw_rays, draw_polygon):
+    Args:
+        position (tuple[float]): The ray caster's position as an (x, y) tuple.
+        angle (float): The direction in which the ray caster is facing as an
+            angle in radians.
+        field_of_view (float): The ray caster's field of view in radians. The
+            field of view is centered on the angle in which the ray caster is
+            facing.
+        number_of_rays (int): The number of rays emitted by the ray caster.
+            These are evenly distributed across the field of view, end-points
+            included.
+        color (pygame.Color): The color of the ray caster and its rays
+            and visible area polygon. Only used if the ray caster is drawn in
+            PyGame. Optional, defaults to ``pygame.Color("black")``.
+        size (float): The size of the ray castter, which is drawn as a circle.
+            Only used if the ray caster is drawn in PyGame. Optional, defaults
+            to ``10.``.
+        ray_thickness (int): The thickness of the rays. Only used if the ray
+            caster is drawn in PyGame. Optional, defaults to ``1``.
+        draw_rays (bool): Whether to draw the rays emitted by the ray caster.
+            Only used if the ray caster is drawn in PyGame. Optional, defaults
+            to ``True``.
+        draw_polygon (bool): Whether to draw the ray caster's visible area
+            polygon. Only used if the ray caster is drawn in PyGame. Optional,
+            defaults to ``True``.
+
+    """
+
+    def __init__(self, position, angle, field_of_view, number_of_rays,
+                 color=pygame.Color("black"), size=10., ray_thickness=1.,
+                 draw_rays=True, draw_polygon=True):
         self.position = position
         self.angle = angle
         self.field_of_view = field_of_view
@@ -57,33 +88,77 @@ class RayCaster:
 
     @property
     def polygon_points(self):
-        """Return the points of the ray caster's visible polygon area."""
+        """np.array or None: The ray caster's visible area polygon points.
+
+        This is ``None`` if the ray caster has not yet cast any rays or if none
+        of the rays hit anything.
+
+        """
         points = None
-        if self.rays is not None:
+        if self.rays is not None and len(self.rays_that_hit)>0:
             position = self.position.reshape(-1, 2)
-            points = self.rays[:, 1]
+            points = self.rays_that_hit[:, 1]
             points = np.concatenate([position, points, position], axis=0)
         return points
 
-    def update(self, walls):
-        self.cast_to(walls)
+    @property
+    def rays_that_hit(self):
+        """np.array or None: The rays that have a valid target point.
 
-    def draw(self, screen):
+        This is ``None`` if the ray caster has not yet cast any rays. If none
+        of the rays hit anything, the resulting array is empty.
+
+        """
+        rays = None
         if self.rays is not None:
-            if self.draw_polygon:
+            rays = self.rays.copy()
+            rays = rays[~np.isnan(rays[:, 1, 0])]
+        return rays
+
+    def draw(self, screen):  ## pragma: no cover
+        """Draw the ray caster, its rays and/or its visible area polygon.
+
+        Args:
+            screen (pygame.Surface): The pygame surface on which to draw the
+                rays and/or visible area polygon.
+
+        """
+        # Draw the rays and/or visible area polygon.
+        if self.rays is not None:
+            if self.draw_polygon and self.polygon_points is not None:
                 surface = pygame.Surface(SCREEN_SIZE)
                 surface.set_alpha(75)
                 pygame.draw.polygon(surface, self.color, self.polygon_points)
                 screen.blit(surface, (0,0))
             if self.draw_rays:
-                for ray in self.rays:
+                for ray in self.rays_that_hit:
                     pygame.draw.line(screen, self.color, ray[0], ray[1],
                                      self.ray_thickness)
         # Draw the ray caster.
         pygame.draw.circle(screen, self.color, self.position, self.size)
 
     def cast_to(self, walls):
-        """Have the ray caster cast rays to a list of walls."""
+        """Have the ray caster cast rays to a list of walls.
+
+        The resulting rays in ``self.rays`` that don't hit anything have
+        ``[np.nan, np.nan]`` as their target point. To get only the rays that
+        hit something, use ``self.rays_that_hit``.
+
+        Args:
+            walls (list[Wall]): List of walls.
+
+        Returns:
+            np.array: The resulting rays. Note that this is also an in-place
+            operation which stores the rays in `self.rays`, but the rays are
+            also returned by this method for convenience.
+
+        """
+        # If there are no walls, then none of the rays hit anything.
+        if not walls:
+            ray = np.concatenate([self.position, [np.nan, np.nan]])
+            rays = ray.reshape((1, 2, 2)).repeat(self.number_of_rays, axis=0)
+            self.rays = rays
+            return self.rays
         # The array of arc angles.
         arc_start = self.angle - self.field_of_view/2
         arc_stop = self.angle + self.field_of_view/2
@@ -114,23 +189,37 @@ class RayCaster:
         u_enumerator = (x1-x3)*(y1-y2) - (y1-y3)*(x1-x2)
         t, u = t_enumerator/denominator, u_enumerator/denominator
         # Adjust ray intersection parameter to exclude invalid intersections.
-        # The maximum length a ray could be is the diameter of the screen, so
-        # letting the length of invalid intersections to twice this length
-        # should make sure they're not selected.
-        t[np.isnan(t) | (t<0) | (u<0) | (u>1)] = 2*np.square(SCREEN_SIZE).sum()
-        # Update ray target points.
-        p2 = p1 + t[:, None]*(p2-p1)
-        # For each ray, find the closest valid target point.
-        t = t.reshape(self.number_of_rays, -1, 1)
-        closest = np.argmin(t, axis=1).flatten()
+        # The length of invalid intersections is set to infinite, to avoid their
+        # selection if a valid option is available.
+        t[np.isnan(t) | (t<0) | (u<0) | (u>1)] = np.inf
+        # For each ray, find the closest hit.
+        t_reshaped = t.reshape(self.number_of_rays, len(walls), 1)
+        closest = np.argmin(t_reshaped, axis=1).flatten()
         closest += np.arange(self.number_of_rays)*len(walls)
+        # Now set the length of invalid intersections to NaN.
+        t[np.isinf(t)] = np.nan
+        # Update the array of ray target points.
+        p2 = p1 + t[:, None]*(p2-p1)
+        # Select final ray source and target points.
         p1 = p1.flatten().reshape(-1, 2)[closest]
         p2 = p2.flatten().reshape(-1, 2)[closest]
         self.rays = np.column_stack((p1, p2))
         self.rays = self.rays.reshape(self.number_of_rays, 2, 2)
+        return self.rays
 
     def sees_point(self, point):
-        """Return whether the ray caster can see a point."""
+        """Return whether the ray caster can see a point.
+
+        Args:
+            point (np.array): The point.
+
+        Returns:
+            bool or None: Whether the ray caster can see the point, i.e. whether
+            the point is inside the ray caster's visible area polygon. This is
+            ``None`` if the ray caster hasn't cast any rays or if none of the
+            rays hit anything.
+
+        """
         visible = None
         if self.polygon_points is not None:
             polygon = shapely.geometry.Polygon(self.polygon_points)
@@ -139,19 +228,36 @@ class RayCaster:
 
 
 class Wall:
-    """A ray-blocking wall."""
+    """A ray-blocking wall.
 
-    def __init__(self, p1, p2, color, thickness):
+    Args:
+        p1 (np.array): The wall's first point.
+        p2 (np.array): The wall's second point.
+        color (pygame.Color): The wall's color. Only used if the wall is drawn
+            in PyGame. Optional, defaults to ``pygame.Color("black")``.
+        thickness (int): The wall's thickness. Only used if the wall is drawn
+            in PyGame. Optional, defaults to ``1``.
+
+    """
+
+    def __init__(self, p1, p2, color=pygame.Color("black"), thickness=1):
         self.p1 = p1
         self.p2 = p2
         self.color = color
         self.thickness = thickness
 
-    def draw(self, screen):
+    def draw(self, screen):  ## pragma: no cover
+        """Draw the wall.
+
+        Args:
+            screen (pygame.Surface): The pygame surface on which to draw the
+                wall.
+
+        """
         pygame.draw.line(screen, self.color, self.p1, self.p2, self.thickness)
 
 
-class RaycastingScene(funkode.scene.Scene):
+class RaycastingScene(funkode.scene.Scene):  ## pragma: no cover
     """The ray casting scene."""
 
     def __init__(self):
@@ -176,7 +282,7 @@ class RaycastingScene(funkode.scene.Scene):
 
     def update(self):
         self.raycaster.position = np.array(pygame.mouse.get_pos())
-        self.raycaster.update(self.walls)
+        self.raycaster.cast_to(self.walls)
 
     def draw(self, screen):
         screen.fill(pygame.Color("black"))
@@ -202,7 +308,7 @@ class RaycastingScene(funkode.scene.Scene):
         ]
 
 
-def main():
+def main():  ## pragma: no cover
     """Main script execution function."""
     # Initialize some PyGame stuff.
     pygame.init()
@@ -215,5 +321,5 @@ def main():
     game.run(screen)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  ## pragma: no cover
     main()

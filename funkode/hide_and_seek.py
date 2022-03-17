@@ -66,14 +66,14 @@ class Character(funkode.raycasting.RayCaster):
         self.position[0] = min(self.position[0], SCREEN_SIZE[0])
         self.position[1] = max(self.position[1], 0.)
         self.position[1] = min(self.position[1], SCREEN_SIZE[1])
-        super().update(walls)
+        self.cast_to(walls)
 
     def draw(self, screen):
         if self.visible:
             super().draw(screen)
 
 
-class HideAndSeekScene(funkode.scene.Scene):
+class HideAndSeekScene(funkode.scene.Scene):  ## pragme: no cover
     """The hide and seek scene."""
 
     def __init__(self):
@@ -232,7 +232,7 @@ class HideAndSeekScene(funkode.scene.Scene):
             self.scene_running = False
 
 
-def main():
+def main():  ## pragma: no cover
     """Main script execution function."""
     # Initialize some PyGame stuff.
     pygame.init()
@@ -246,5 +246,5 @@ def main():
     game.run(screen)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  ## pragma: no cover
     main()

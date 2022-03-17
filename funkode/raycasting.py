@@ -2,6 +2,7 @@
 import numpy as np
 import pygame
 import shapely.geometry
+import unittest
 
 import funkode.scene
 

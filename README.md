@@ -111,6 +111,18 @@ pytest --cov=funkode/ --cov-report=term-missing tests/
 This will run the unit tests and print a coverage report that shows which lines are not
 covered by the unit tests.
 
+### Code style
+
+Use pylint to check the code style:
+
+```bash
+cd <FUNKODE_ROOT>
+source .venv/bin/activate
+pylint --rcfile=tests/pylintrc funkode/
+```
+
+Feature branches cannot be merged until all comments are dealt with.
+
 ## Ideas for future fun
 
 Here are some ideas for topics to explore in the future:

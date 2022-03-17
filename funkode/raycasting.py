@@ -115,7 +115,7 @@ class RayCaster:
             rays = rays[~np.isnan(rays[:, 1, 0])]
         return rays
 
-    def draw(self, screen):
+    def draw(self, screen):  ## pragma: no cover
         """Draw the ray caster, its rays and/or its visible area polygon.
 
         Args:
@@ -246,7 +246,7 @@ class Wall:
         self.color = color
         self.thickness = thickness
 
-    def draw(self, screen):
+    def draw(self, screen):  ## pragma: no cover
         """Draw the wall.
 
         Args:
@@ -257,7 +257,7 @@ class Wall:
         pygame.draw.line(screen, self.color, self.p1, self.p2, self.thickness)
 
 
-class RaycastingScene(funkode.scene.Scene):
+class RaycastingScene(funkode.scene.Scene):  ## pragma: no cover
     """The ray casting scene."""
 
     def __init__(self):
@@ -308,7 +308,7 @@ class RaycastingScene(funkode.scene.Scene):
         ]
 
 
-def main():
+def main():  ## pragma: no cover
     """Main script execution function."""
     # Initialize some PyGame stuff.
     pygame.init()

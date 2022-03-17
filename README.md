@@ -4,19 +4,52 @@ A repository in which I have fun with Python code!
 
 ## Setup
 
+### Regular users
+
 First, clone the git repository:
+
+```bash
+git clone https://www.github.com/UltimateTimmeh/funkode /tmp/funkode
+```
+
+Next, install FunKode as a Python package:
+
+```bash
+cd /tmp/funkode
+python -m pip install .
+```
+
+Finally, remove the git repository:
+
+```bash
+rm -r /tmp/funkode
+```
+
+To update to the latest version, simply repeat the above steps.
+
+### Developers
+
+First, clone the git repository to a destination of your choosing we'll call
+`<FUNKODE_ROOT>`:
 
 ```bash
 git clone https://www.github.com/UltimateTimmeh/funkode <FUNKODE_ROOT>
 ```
 
-Next, set up the virtual environment and install FunKode as a package in editable mode:
+Next, set up the virtual environment:
 
 ```bash
 cd <FUNKODE_ROOT>
 virtualenv -ppython3 .venv
+```
+
+Finally, install FunKode and its development dependencies in editable mode:
+
+```bash
+cd <FUNKODE_ROOT>
 source .venv/bin/activate
 python -m pip install -e .
+python -m pip install -r requirements_dev.txt
 ```
 
 ## Usage
@@ -62,12 +95,30 @@ Launch with the following command:
 hide-and-seek
 ```
 
+## Testing
+
+### Unit tests
+
+To run the unit tests, execute the following commands, where `<FUNKODE_ROOT>` is the root
+directory of your local copy of the funkode repository:
+
+```bash
+cd <FUNKODE_ROOT>
+source .venv/bin/activate
+pytest --cov=funkode/ --cov-report=term-missing tests/
+```
+
+This will run the unit tests and print a coverage report that shows which lines are not
+covered by the unit tests.
+
 ## Ideas for future fun
 
 Here are some ideas for topics to explore in the future:
 
 - **3D Rendering with ray casting** - To create Doom-like scenarios (the game).
 - **Smart Rockets** - Genetic algorithm in which rockets automatically learn to hit a target.
+  or perhaps some other genetic algorithm challenge, like particles learning to navigate
+  a maze (running only) or a 2D platformer level (running and jumping)
 - **Mandelbulb** - This groovy 3D object first requires exploring the following:
   - *Signed Distance Functions*
   - *Ray Marching*

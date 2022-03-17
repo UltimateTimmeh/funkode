@@ -61,8 +61,8 @@ class RayCaster:
         size (float): The size of the ray castter, which is drawn as a circle.
             Only used if the ray caster is drawn in PyGame. Optional, defaults
             to ``10.``.
-        ray_thickness (float): The thickness of the rays. Only used if the ray
-            caster is drawn in PyGame. Optional, defaults to ``1.``.
+        ray_thickness (int): The thickness of the rays. Only used if the ray
+            caster is drawn in PyGame. Optional, defaults to ``1``.
         draw_rays (bool): Whether to draw the rays emitted by the ray caster.
             Only used if the ray caster is drawn in PyGame. Optional, defaults
             to ``True``.
@@ -235,12 +235,12 @@ class Wall:
         p2 (np.array): The wall's second point.
         color (pygame.Color): The wall's color. Only used if the wall is drawn
             in PyGame. Optional, defaults to ``pygame.Color("black")``.
-        thickness (float): The wall's thickness. Only used if the wall is drawn
-            in PyGame. Optional, defaults to ``1.``.
+        thickness (int): The wall's thickness. Only used if the wall is drawn
+            in PyGame. Optional, defaults to ``1``.
 
     """
 
-    def __init__(self, p1, p2, color=pygame.Color("black"), thickness=1.):
+    def __init__(self, p1, p2, color=pygame.Color("black"), thickness=1):
         self.p1 = p1
         self.p2 = p2
         self.color = color
@@ -321,5 +321,5 @@ def main():  ## pragma: no cover
     game.run(screen)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  ## pragma: no cover
     main()

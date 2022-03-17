@@ -10,18 +10,6 @@ with open("README.md") as readme_file:
 with open("requirements.txt") as req_file:
     requirements = req_file.read()
 
-with open("requirements_dev.txt") as req_dev_file:
-    requirements_dev = req_dev_file.read()
-
-setup_requirements = [
-    "pytest-runner",
-]
-
-test_requirements = [
-    requirements,
-    requirements_dev,
-]
-
 version = "0.0.1"
 
 setuptools.setup(
@@ -45,9 +33,7 @@ setuptools.setup(
     keywords="funkode",
     name="funkode",
     packages=setuptools.find_packages(),
-    setup_requires=setup_requirements,
     test_suite="tests",
-    tests_require=test_requirements,
     url="https://www.github.com/UltimateTimmeh/funkode",
     zip_safe=False,
     version=version,

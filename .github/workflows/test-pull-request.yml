@@ -29,6 +29,4 @@ jobs:
           python -m pip install -r requirements.txt
           python -m pip install -r requirements_dev.txt
       - name: Run unit tests
-        env:
-          PYTHONPATH: $PYTHONPATH:funkode/
-        run: pytest --cov=funkode/ --cov-report=term-missing tests/
+        run: PYTHONPATH="$PYTHONPATH:funkode/" pytest --cov=funkode/ --cov-report=term-missing tests/

@@ -19,7 +19,7 @@ class TestFunctions(unittest.TestCase):
         np.random.seed(42)
         screen_size = (800, 600)
         output = raycasting.random_point(screen_size)
-        self.assertEqual(output.tolist(), [300.0, 670.0])
+        self.assertEqual(output.tolist(), [300.0, 570.0])
 
 
 class TestRayCatser(unittest.TestCase):

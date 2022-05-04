@@ -1,29 +1,29 @@
-"""Unittests for the `funkode.raycasting` module."""
+"""Unittests for the `funkode.ray.cast` module."""
 import unittest
 
 import numpy as np
 
-from funkode import raycasting
+from funkode.ray import cast
 
 
 class TestFunctions(unittest.TestCase):
-    """Unit tests for functions in the `funkode.raycasting` module."""
+    """Unit tests for functions in the `funkode.ray.cast` module."""
 
     def test_random_point(self):
-        """raycasting.random_point: correct output
+        """cast.random_point: correct output
 
-        Test if `raycasting.random_point` correctly returns a random point
+        Test if `cast.random_point` correctly returns a random point
         within the bounds of the given screen dimensions.
 
         """
         np.random.seed(42)
         screen_size = (800, 600)
-        output = raycasting.random_point(screen_size)
+        output = cast.random_point(screen_size)
         self.assertEqual(output.tolist(), [300.0, 570.0])
 
 
 class TestRayCatser(unittest.TestCase):
-    """Unit tests for the `funkode.raycasting.RayCaster` class."""
+    """Unit tests for the `funkode.cast.RayCaster` class."""
 
     def setUp(self):
         """Setup for the test class."""
@@ -31,18 +31,18 @@ class TestRayCatser(unittest.TestCase):
         angle = 0.
         field_of_view = np.pi
         number_of_rays = 3
-        self.raycaster = raycasting.RayCaster(
+        self.raycaster = cast.RayCaster(
             position, angle, field_of_view, number_of_rays
         )
         self.walls = [
-            raycasting.Wall(np.array([-10., -10.]), np.array([10., -10.])),
-            raycasting.Wall(np.array([10., -10.]), np.array([10., 10.])),
+            cast.Wall(np.array([-10., -10.]), np.array([10., -10.])),
+            cast.Wall(np.array([10., -10.]), np.array([10., 10.])),
         ]
 
     def test_init(self):
-        """raycasting.RayCaster: correct output
+        """cast.RayCaster: correct output
 
-        Test if `raycasting.RayCaster` objects are initialized correctly.
+        Test if `cast.RayCaster` objects are initialized correctly.
 
         """
         self.assertEqual(self.raycaster.position.tolist(), [0., 0.])
@@ -193,16 +193,16 @@ class TestRayCatser(unittest.TestCase):
 
 
 class TestWall(unittest.TestCase):
-    """Unit tests for the `funkode.raycasting.Wall` class."""
+    """Unit tests for the `funkode.cast.Wall` class."""
 
     def test_init(self):
-        """raycasting.Wall: correct output
+        """cast.Wall: correct output
 
-        Test if `raycasting.Wall` objects are initialized correctly.
+        Test if `cast.Wall` objects are initialized correctly.
 
         """
         p1 = np.array([0., 0.])
         p2 = np.array([1., 1.])
-        output = raycasting.Wall(p1, p2)
+        output = cast.Wall(p1, p2)
         self.assertIs(output.p1, p1)
         self.assertIs(output.p2, p2)

@@ -1,6 +1,4 @@
 """Plot the Mandelbrot set."""
-import pathlib
-
 import numpy as np
 import pygame
 from PIL import Image

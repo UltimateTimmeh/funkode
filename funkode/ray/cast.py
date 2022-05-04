@@ -3,7 +3,7 @@ import numpy as np
 import pygame
 import shapely.geometry
 
-import funkode.scene
+import funkode.core.scene
 
 FRAMERATE = 60
 SCREEN_SIZE = (800, 600)
@@ -257,7 +257,7 @@ class Wall:
         pygame.draw.line(screen, self.color, self.p1, self.p2, self.thickness)
 
 
-class RaycastingScene(funkode.scene.Scene):  ## pragma: no cover
+class RaycastingScene(funkode.core.scene.Scene):  ## pragma: no cover
     """The ray casting scene."""
 
     def __init__(self):
@@ -317,7 +317,7 @@ def main():  ## pragma: no cover
     # Set up the scene.
     scene = RaycastingScene()
     # Initialize and run the game.
-    game = funkode.scene.SceneContext(scene, FRAMERATE)
+    game = funkode.core.scene.SceneContext(scene, FRAMERATE)
     game.run(screen)
 
 

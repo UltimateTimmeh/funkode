@@ -22,9 +22,9 @@ setuptools.setup(
     description="Having some fun with code.",
     entry_points = {
               "console_scripts": [
-                  "mandelbrot = funkode.mandelbrot:main",
-                  "raycasting = funkode.raycasting:main",
-                  "hide-and-seek = funkode.hide_and_seek:main",
+                  "mandelbrot = funkode.complex.mandelbrot:main",
+                  "raycasting = funkode.ray.cast:main",
+                  "hide-and-seek = funkode.ray.hide_and_seek:main",
               ],
           },
     install_requires=requirements,

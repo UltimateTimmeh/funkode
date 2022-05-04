@@ -1,12 +1,11 @@
 """Plot the Mandelbrot set."""
-import pathlib
-
 import numpy as np
 import pygame
 from PIL import Image
 
-import funkode.palette
-import funkode.scene
+import funkode.core.constants
+import funkode.core.palette
+import funkode.core.scene
 
 FRAMERATE = 60
 SCREEN_SIZE = (400, 300)
@@ -168,7 +167,7 @@ class MandelbrotSet:
         self.zoom_complex(a, b, zoom_factor)
 
 
-class MandelbrotScene(funkode.scene.Scene):
+class MandelbrotScene(funkode.core.scene.Scene):
     """The Mandelbrot scene."""
 
     def __init__(self, amin, amax, bmin, bmax, na, nb, max_iterations,
@@ -288,11 +287,11 @@ def main():
     bmin, bmax = -1., 1.
     na, nb = SCREEN_SIZE
     max_iterations = SCREEN_ITERATIONS
-    palettes = funkode.palette.ALL
+    palettes = funkode.core.palette.ALL
     # Initialize some PyGame stuff.
     pygame.init()
     screen = pygame.display.set_mode(SCREEN_SIZE)
-    icon_fp = pathlib.Path(__file__).resolve().parent/"icons"/"mandelbrot.png"
+    icon_fp = funkode.core.constants.ICONS_DIR/"mandelbrot.png"
     icon = pygame.image.load(icon_fp).convert_alpha()
     pygame.display.set_icon(icon)
     pygame.display.set_caption("Mandelbrot Viewer")
@@ -305,7 +304,7 @@ def main():
         palettes=palettes,
     )
     # Initialize and run the game.
-    game = funkode.scene.SceneContext(scene, FRAMERATE)
+    game = funkode.core.scene.SceneContext(scene, FRAMERATE)
     game.run(screen)
 
 

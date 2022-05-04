@@ -2,8 +2,8 @@
 import numpy as np
 import pygame
 
-import funkode.scene
-import funkode.raycasting
+import funkode.core.scene
+import funkode.ray.cast
 
 FRAMERATE = 60
 SCREEN_SIZE = (800, 600)
@@ -44,7 +44,7 @@ WALL_THICKNESS = 3
 AMOUNT_OF_WALLS = 5
 
 
-class Character(funkode.raycasting.RayCaster):
+class Character(funkode.ray.cast.RayCaster):
     """A character on the playing field."""
 
     def __init__(self, *args, **kwargs):
@@ -73,12 +73,12 @@ class Character(funkode.raycasting.RayCaster):
             super().draw(screen)
 
 
-class HideAndSeekScene(funkode.scene.Scene):  ## pragme: no cover
+class HideAndSeekScene(funkode.core.scene.Scene):  ## pragme: no cover
     """The hide and seek scene."""
 
     def __init__(self):
         self.player = Character(
-            position=funkode.raycasting.random_point(SCREEN_SIZE),
+            position=funkode.ray.cast.random_point(SCREEN_SIZE),
             angle=np.random.rand()*360*DEGREES,
             field_of_view=PLAYER_FOV,
             number_of_rays=PLAYER_NRAYS,
@@ -89,7 +89,7 @@ class HideAndSeekScene(funkode.scene.Scene):  ## pragme: no cover
             draw_polygon=PLAYER_VISION_POLYGON,
         )
         self.enemy = Character(
-            position=funkode.raycasting.random_point(SCREEN_SIZE),
+            position=funkode.ray.cast.random_point(SCREEN_SIZE),
             angle=np.random.rand()*360*DEGREES,
             field_of_view=ENEMY_FOV,
             number_of_rays=ENEMY_NRAYS,
@@ -191,26 +191,26 @@ class HideAndSeekScene(funkode.scene.Scene):  ## pragme: no cover
     def refresh_walls(self):
         self.walls = []
         for _ in range(AMOUNT_OF_WALLS):
-            wall = funkode.raycasting.Wall(
-                funkode.raycasting.random_point(SCREEN_SIZE),
-                funkode.raycasting.random_point(SCREEN_SIZE),
+            wall = funkode.ray.cast.Wall(
+                funkode.ray.cast.random_point(SCREEN_SIZE),
+                funkode.ray.cast.random_point(SCREEN_SIZE),
                 WALL_COLOR, WALL_THICKNESS,
             )
             self.walls.append(wall)
         self.walls += [
-            funkode.raycasting.Wall(
+            funkode.ray.cast.Wall(
                 CORNERS["top_left"], CORNERS["top_right"],
                 WALL_COLOR, WALL_THICKNESS
             ),
-            funkode.raycasting.Wall(
+            funkode.ray.cast.Wall(
                 CORNERS["top_right"], CORNERS["bottom_right"],
                 WALL_COLOR, WALL_THICKNESS
             ),
-            funkode.raycasting.Wall(
+            funkode.ray.cast.Wall(
                 CORNERS["bottom_right"], CORNERS["bottom_left"],
                 WALL_COLOR, WALL_THICKNESS
             ),
-            funkode.raycasting.Wall(
+            funkode.ray.cast.Wall(
                 CORNERS["bottom_left"], CORNERS["top_left"],
                 WALL_COLOR, WALL_THICKNESS
             ),
@@ -219,9 +219,9 @@ class HideAndSeekScene(funkode.scene.Scene):  ## pragme: no cover
     def restart_scene(self):
         if not self.scene_running:
             self.refresh_walls()
-            self.player.position = funkode.raycasting.random_point(SCREEN_SIZE)
+            self.player.position = funkode.ray.cast.random_point(SCREEN_SIZE)
             self.player.angle = np.random.rand()*360*DEGREES
-            self.enemy.position = funkode.raycasting.random_point(SCREEN_SIZE)
+            self.enemy.position = funkode.ray.cast.random_point(SCREEN_SIZE)
             self.enemy.angle = np.random.rand()*360*DEGREES
             self.enemy.visible = ENEMY_VISIBLE
             self.scene_running = True
@@ -242,7 +242,7 @@ def main():  ## pragma: no cover
     # Set up the scene.
     scene = HideAndSeekScene()
     # Initialize and run the game.
-    game = funkode.scene.SceneContext(scene, FRAMERATE)
+    game = funkode.core.scene.SceneContext(scene, FRAMERATE)
     game.run(screen)
 
 

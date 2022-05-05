@@ -6,22 +6,6 @@ import numpy as np
 from funkode.ray import cast
 
 
-class TestFunctions(unittest.TestCase):
-    """Unit tests for functions in the `funkode.ray.cast` module."""
-
-    def test_random_point(self):
-        """cast.random_point: correct output
-
-        Test if `cast.random_point` correctly returns a random point
-        within the bounds of the given screen dimensions.
-
-        """
-        np.random.seed(42)
-        screen_size = (800, 600)
-        output = cast.random_point(screen_size)
-        self.assertEqual(output.tolist(), [300.0, 570.0])
-
-
 class TestRayCatser(unittest.TestCase):
     """Unit tests for the `funkode.cast.RayCaster` class."""
 

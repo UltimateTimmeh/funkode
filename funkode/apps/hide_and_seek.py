@@ -4,6 +4,7 @@ import pygame
 
 import funkode.core.scene
 import funkode.ray.cast
+from funkode.core.random import random_point_on_screen
 
 FRAMERATE = 60
 SCREEN_SIZE = (800, 600)
@@ -24,8 +25,8 @@ PLAYER_FOV = 72*DEGREES
 PLAYER_NRAYS = 1000
 PLAYER_COLOR = pygame.Color("blue")
 PLAYER_SIZE = 5
-PLAYER_VISION_RAYS = False
-PLAYER_VISION_POLYGON = True
+PLAYER_RAYS_VISIBLE = False
+PLAYER_POLYGON_VISIBLE = True
 PLAYER_MOVE_VELOCITY = 5
 PLAYER_TURN_VELOCITY = 5*DEGREES
 
@@ -33,8 +34,8 @@ ENEMY_COLOR = pygame.Color("red")
 ENEMY_SIZE = 5
 ENEMY_FOV = 72*DEGREES
 ENEMY_NRAYS = 1000
-ENEMY_VISION_RAYS = False
-ENEMY_VISION_POLYGON = True
+ENEMY_RAYS_VISIBLE = False
+ENEMY_POLYGON_VISIBLE = True
 ENEMY_MOVE_VELOCITY = 5
 ENEMY_TURN_VELOCITY = 5*DEGREES
 ENEMY_VISIBLE = False
@@ -47,8 +48,14 @@ AMOUNT_OF_WALLS = 5
 class Character(funkode.ray.cast.RayCaster):
     """A character on the playing field."""
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, position, angle, field_of_view, number_of_rays,
+                 color, size, ray_thickness, draw_rays, draw_polygon):
+        super().__init__(position, angle, field_of_view, number_of_rays)
+        self.color = color
+        self.size = size
+        self.ray_thickness = ray_thickness
+        self.draw_rays = draw_rays
+        self.draw_polygon = draw_polygon
         self.velocity = 0.
         self.rotation = 0.
         self.visible = True
@@ -70,7 +77,21 @@ class Character(funkode.ray.cast.RayCaster):
 
     def draw(self, screen):
         if self.visible:
-            super().draw(screen)
+            # Draw the rays and/or visible area polygon.
+            if self.rays is not None:
+                if self.draw_polygon and self.polygon_points is not None:
+                    surface = pygame.Surface(SCREEN_SIZE)
+                    surface.set_alpha(75)
+                    pygame.draw.polygon(surface, self.color,
+                                        self.polygon_points)
+                    screen.blit(surface, (0,0))
+                if self.draw_rays:
+                    for ray in self.rays_that_hit:
+                        pygame.draw.line(screen, self.color, ray[0], ray[1],
+                                         self.ray_thickness)
+            # Draw the ray caster.
+            pygame.draw.circle(screen, self.color, self.position,
+                               self.size)
 
 
 class HideAndSeekScene(funkode.core.scene.Scene):  ## pragme: no cover
@@ -78,26 +99,26 @@ class HideAndSeekScene(funkode.core.scene.Scene):  ## pragme: no cover
 
     def __init__(self):
         self.player = Character(
-            position=funkode.ray.cast.random_point(SCREEN_SIZE),
+            position=random_point_on_screen(SCREEN_SIZE),
             angle=np.random.rand()*360*DEGREES,
             field_of_view=PLAYER_FOV,
             number_of_rays=PLAYER_NRAYS,
             color=PLAYER_COLOR,
             size=PLAYER_SIZE,
             ray_thickness=RAY_THICKNESS,
-            draw_rays=PLAYER_VISION_RAYS,
-            draw_polygon=PLAYER_VISION_POLYGON,
+            draw_rays=PLAYER_RAYS_VISIBLE,
+            draw_polygon=PLAYER_POLYGON_VISIBLE,
         )
         self.enemy = Character(
-            position=funkode.ray.cast.random_point(SCREEN_SIZE),
+            position=random_point_on_screen(SCREEN_SIZE),
             angle=np.random.rand()*360*DEGREES,
             field_of_view=ENEMY_FOV,
             number_of_rays=ENEMY_NRAYS,
             color=ENEMY_COLOR,
             size=ENEMY_SIZE,
             ray_thickness=RAY_THICKNESS,
-            draw_rays=ENEMY_VISION_RAYS,
-            draw_polygon=ENEMY_VISION_POLYGON,
+            draw_rays=ENEMY_RAYS_VISIBLE,
+            draw_polygon=ENEMY_POLYGON_VISIBLE,
         )
         self.walls = []
         self.scene_running = False
@@ -165,7 +186,8 @@ class HideAndSeekScene(funkode.core.scene.Scene):  ## pragme: no cover
         self.enemy.draw(screen)
         self.player.draw(screen)
         for wall in self.walls:
-            wall.draw(screen)
+            pygame.draw.line(screen, WALL_COLOR, wall.p1, wall.p2,
+                             WALL_THICKNESS)
         # Draw the score.
         txt = f"Score: {self.score}"
         txt_pos = (12, SCREEN_SIZE[1]-SCORE_SIZE-12)
@@ -192,36 +214,27 @@ class HideAndSeekScene(funkode.core.scene.Scene):  ## pragme: no cover
         self.walls = []
         for _ in range(AMOUNT_OF_WALLS):
             wall = funkode.ray.cast.Wall(
-                funkode.ray.cast.random_point(SCREEN_SIZE),
-                funkode.ray.cast.random_point(SCREEN_SIZE),
-                WALL_COLOR, WALL_THICKNESS,
+                random_point_on_screen(SCREEN_SIZE),
+                random_point_on_screen(SCREEN_SIZE),
             )
             self.walls.append(wall)
         self.walls += [
-            funkode.ray.cast.Wall(
-                CORNERS["top_left"], CORNERS["top_right"],
-                WALL_COLOR, WALL_THICKNESS
-            ),
-            funkode.ray.cast.Wall(
-                CORNERS["top_right"], CORNERS["bottom_right"],
-                WALL_COLOR, WALL_THICKNESS
-            ),
-            funkode.ray.cast.Wall(
-                CORNERS["bottom_right"], CORNERS["bottom_left"],
-                WALL_COLOR, WALL_THICKNESS
-            ),
-            funkode.ray.cast.Wall(
-                CORNERS["bottom_left"], CORNERS["top_left"],
-                WALL_COLOR, WALL_THICKNESS
-            ),
+            funkode.ray.cast.Wall(CORNERS["top_left"],
+                                  CORNERS["top_right"]),
+            funkode.ray.cast.Wall(CORNERS["top_right"],
+                                  CORNERS["bottom_right"]),
+            funkode.ray.cast.Wall(CORNERS["bottom_right"],
+                                  CORNERS["bottom_left"]),
+            funkode.ray.cast.Wall(CORNERS["bottom_left"],
+                                  CORNERS["top_left"]),
         ]
 
     def restart_scene(self):
         if not self.scene_running:
             self.refresh_walls()
-            self.player.position = funkode.ray.cast.random_point(SCREEN_SIZE)
+            self.player.position = random_point_on_screen(SCREEN_SIZE)
             self.player.angle = np.random.rand()*360*DEGREES
-            self.enemy.position = funkode.ray.cast.random_point(SCREEN_SIZE)
+            self.enemy.position = random_point_on_screen(SCREEN_SIZE)
             self.enemy.angle = np.random.rand()*360*DEGREES
             self.enemy.visible = ENEMY_VISIBLE
             self.scene_running = True
@@ -232,7 +245,7 @@ class HideAndSeekScene(funkode.core.scene.Scene):  ## pragme: no cover
             self.scene_running = False
 
 
-def main():  ## pragma: no cover
+def main():
     """Main script execution function."""
     # Initialize some PyGame stuff.
     pygame.init()
@@ -246,5 +259,5 @@ def main():  ## pragma: no cover
     game.run(screen)
 
 
-if __name__ == "__main__":  ## pragma: no cover
+if __name__ == "__main__":
     main()

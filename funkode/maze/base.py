@@ -1,6 +1,4 @@
 """Base classes for mazes."""
-import abc
-
 import numpy as np
 
 
@@ -15,11 +13,15 @@ class MazeCell:
     def __init__(self, x, y):
         self.x = x
         self.y = y
+        self.active = False
         self.north_neighbor = None
         self.east_neighbor = None
         self.south_neighbor = None
         self.west_neighbor = None
-        self.active = False
+        self.north_wall = None
+        self.east_wall = None
+        self.south_wall = None
+        self.west_wall = None
 
     @property
     def is_on_edge(self):
@@ -58,6 +60,16 @@ class MazeCell:
         np.random.shuffle(neighbors)
         return neighbors
 
+    @property
+    def walls(self):
+        walls = [
+            self.north_wall,
+            self.east_wall,
+            self.south_wall,
+            self.west_wall,
+        ]
+        return walls
+
     def get_opposite_neighbor(self, neighbor):
         if neighbor not in self.neighbors:
             raise ValueError("Given cell is not a neighbor of this cell.")
@@ -71,25 +83,38 @@ class MazeCell:
             opposite_neighbor = self.east_neighbor
         return opposite_neighbor
 
-    def move_to(self, target_cell):
-        if target_cell is None or not target_cell.active:
+    def move_to(self, target_cell, target_wall):
+        if target_cell is None or not target_cell.active or target_wall.active:
             target_cell = self
         return target_cell
 
     def move_north(self):
-        return self.move_to(self.north_neighbor)
+        return self.move_to(self.north_neighbor, self.north_wall)
 
     def move_east(self):
-        return self.move_to(self.east_neighbor)
+        return self.move_to(self.east_neighbor, self.east_wall)
 
     def move_south(self):
-        return self.move_to(self.south_neighbor)
+        return self.move_to(self.south_neighbor, self.south_wall)
 
     def move_west(self):
-        return self.move_to(self.west_neighbor)
+        return self.move_to(self.west_neighbor, self.west_wall)
 
 
-class AbstractMaze(abc.ABC):
+class MazeWall:
+    """A wall dividing two adjacent cells in a maze."""
+
+    def __init__(self):
+        self.active = True
+        self.cell1 = None
+        self.cell2 = None
+
+    @property
+    def adjacent_cells(self):
+        return [cell for cell in [self.cell1, self.cell2] if cell is not None]
+
+
+class AbstractMaze:
     """Abstract base class for mazes."""
 
     def __init__(self, width, height):
@@ -107,6 +132,7 @@ class AbstractMaze(abc.ABC):
         for x in range(width):
             for y in range(height):
                 cell = cells[x][y]
+                # Assign neighbors.
                 if y > 0:
                     cell.north_neighbor = cells[x][y-1]
                 if y < self.height-1:
@@ -115,6 +141,35 @@ class AbstractMaze(abc.ABC):
                     cell.west_neighbor = cells[x-1][y]
                 if x < self.width-1:
                     cell.east_neighbor = cells[x+1][y]
+                # Assign walls.
+                if cell.north_wall is None:
+                    wall = MazeWall()
+                    wall.cell1 = cell
+                    cell.north_wall = wall
+                    if cell.north_neighbor is not None:
+                        wall.cell2 = cell.north_neighbor
+                        cell.north_neighbor.south_wall = wall
+                if cell.east_wall is None:
+                    wall = MazeWall()
+                    wall.cell1 = cell
+                    cell.east_wall = wall
+                    if cell.east_neighbor is not None:
+                        wall.cell2 = cell.east_neighbor
+                        cell.east_neighbor.west_wall = wall
+                if cell.south_wall is None:
+                    wall = MazeWall()
+                    wall.cell1 = cell
+                    cell.south_wall = wall
+                    if cell.south_neighbor is not None:
+                        wall.cell2 = cell.south_neighbor
+                        cell.south_neighbor.north_wall = wall
+                if cell.west_wall is None:
+                    wall = MazeWall()
+                    wall.cell1 = cell
+                    cell.west_wall = wall
+                    if cell.west_neighbor is not None:
+                        wall.cell2 = cell.west_neighbor
+                        cell.west_neighbor.east_wall = wall
         return cells
 
     def _generate(self):
@@ -132,10 +187,43 @@ class GrowingMaze(AbstractMaze):
         """Update the maze a single step."""
         if not self.steps:
             return
-        step_x, step_y = self.steps.pop(0)
-        self.cells[step_x][step_y].active = True
+        self.steps.pop(0).apply(self)
 
     def mature(self):
         """Fully mature the maze by exhausting its list of steps."""
         while self.steps:
             self.update()
+
+
+class GrowStep:
+    """A single step in the growing of a maze."""
+
+    def __init__(self, actions):
+        if isinstance(actions, GrowAction):
+            actions = [actions]
+        self.actions = actions
+
+    def apply(self, maze):
+        for action in self.actions:
+            action.apply(maze)
+
+
+class GrowAction:
+    """A single action in the growing of a maze."""
+
+    def __init__(self, action, cell_position, wall_position=None):
+        self.action = action
+        self.cell_position = cell_position
+        self.wall_position = wall_position
+
+    def apply(self, maze):
+        # Get the cell or wall to adjust.
+        x, y = self.cell_position
+        adjusted = maze.cells[x][y]
+        if self.wall_position is not None:
+            adjusted = getattr(adjusted, f"{self.wall_position}_wall")
+        # Apply the action to the adjusted item.
+        if self.action in ["activate", "deactivate"]:
+            adjusted.active = self.action == "activate"
+        else:
+            raise NotImplementedError(f"Invalid action: {self.action}.")

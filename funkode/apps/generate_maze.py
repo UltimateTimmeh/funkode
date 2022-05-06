@@ -15,6 +15,7 @@ SCREEN_SIZE = (MAZE_WIDTH*CELL_WIDTH, MAZE_HEIGHT*CELL_HEIGHT)
 
 WALL_COLOR = pygame.Color("black")
 FLOOR_COLOR = pygame.Color("white")
+WALL_WIDTH = 1
 ANIMATE=True
 
 
@@ -22,15 +23,35 @@ class DrawableMaze(funkode.maze.base.GrowingMaze):
     """A growing maze that can be drawn in PyGame."""
 
     def draw(self, screen):
+        # Draw the cell floor.
         for x in range(self.width):
             for y in range(self.height):
                 cell = self.cells[x][y]
-                # Draw the cell floor.
-                pos_x = x*CELL_WIDTH
-                pos_y = y*CELL_WIDTH
-                rect = pygame.Rect(pos_x, pos_y, CELL_WIDTH, CELL_HEIGHT)
+                pos = (x*CELL_WIDTH, y*CELL_WIDTH)
+                size = (CELL_WIDTH, CELL_HEIGHT)
+                rect = pygame.Rect(pos, size)
                 color = FLOOR_COLOR if cell.active else WALL_COLOR
                 pygame.draw.rect(screen, color, rect)
+        # Draw the cell walls.
+        for x in range(self.width):
+            for y in range(self.height):
+                cell = self.cells[x][y]
+                if cell is cell.north_wall.cell1 and cell.north_wall.active:
+                    start = (x*CELL_WIDTH, y*CELL_HEIGHT)
+                    end = (start[0]+CELL_WIDTH, start[1])
+                    pygame.draw.line(screen, WALL_COLOR, start, end, WALL_WIDTH)
+                if cell is cell.east_wall.cell1 and cell.east_wall.active:
+                    start = ((x+1)*CELL_WIDTH, y*CELL_HEIGHT)
+                    end = (start[0], start[1]+CELL_HEIGHT)
+                    pygame.draw.line(screen, WALL_COLOR, start, end, WALL_WIDTH)
+                if cell is cell.south_wall.cell1 and cell.south_wall.active:
+                    start = (x*CELL_WIDTH, (y+1)*CELL_HEIGHT)
+                    end = (start[0]+CELL_WIDTH, start[1])
+                    pygame.draw.line(screen, WALL_COLOR, start, end, WALL_WIDTH)
+                if cell is cell.west_wall.cell1 and cell.west_wall.active:
+                    start = (x*CELL_WIDTH, y*CELL_HEIGHT)
+                    end = (start[0], start[1]+CELL_HEIGHT)
+                    pygame.draw.line(screen, WALL_COLOR, start, end, WALL_WIDTH)
 
 
 class MazeGeneratorScene(funkode.core.scene.Scene):

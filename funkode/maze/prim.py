@@ -1,10 +1,12 @@
 """Generate random mazes using the Randomized Prim's algorithm."""
 import numpy as np
 
-import funkode.maze.base
+from funkode.maze.base import AbstractMaze
+from funkode.maze.base import GrowStep
+from funkode.maze.base import GrowAction
 
 
-class PrimMaze(funkode.maze.base.AbstractMaze):
+class PrimMaze(AbstractMaze):
     """A maze generated with the Randomized Prim's algorithm."""
 
     def __init__(self, width, height):
@@ -25,14 +27,25 @@ class PrimMaze(funkode.maze.base.AbstractMaze):
 
     def _generate(self):
         # Step 1: Start with a grid full of inactive cells.
-        ## Already fulfilled when initializing base class.
+        ## Make all walls inactive, as they don't matter for this type of maze.
+        actions = []
+        for x in range(self.width):
+            for y in range(self.height):
+                actions += [
+                    GrowAction("deactivate", (x, y), "north"),
+                    GrowAction("deactivate", (x, y), "east"),
+                    GrowAction("deactivate", (x, y), "south"),
+                    GrowAction("deactivate", (x, y), "west"),
+                ]
+        self.steps.append(GrowStep(actions))
         # Step 2: Pick a random cell.
         rng = np.random.default_rng()
         first_x = rng.choice(range(1, self.width-1, 2))
         first_y = rng.choice(range(1, self.height-1, 2))
         first_cell = self.cells[first_x][first_y]
         # Step 3 : Activate that cell.
-        self.steps.append(first_cell.position)
+        action = GrowAction("activate", (first_x, first_y))
+        self.steps.append(GrowStep(action))
         first_cell.active = True
         # Step 4: Add its inner inactive neighbors to a list of "walls".
         walls = first_cell.shuffled_inner_inactive_neighbors
@@ -49,9 +62,12 @@ class PrimMaze(funkode.maze.base.AbstractMaze):
                 # Step 5.2.2: If that opposite neighbor is not on the edge:
                 if not opposite_neighbor.is_on_edge:
                     # Activate the wall and the opposite neighbor.
-                    self.steps.append(wall.position)
+                    actions = [
+                        GrowAction("activate", wall.position),
+                        GrowAction("activate", opposite_neighbor.position),
+                    ]
+                    self.steps.append(GrowStep(actions))
                     wall.active = True
-                    self.steps.append(opposite_neighbor.position)
                     opposite_neighbor.active = True
                     # And add the opposite neighbor's inner inactive neighbors
                     # to the list of walls.

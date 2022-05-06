@@ -94,7 +94,7 @@ class Character(funkode.ray.cast.RayCaster):
                                self.size)
 
 
-class HideAndSeekScene(funkode.core.scene.Scene):  ## pragme: no cover
+class HideAndSeekScene(funkode.core.scene.Scene):
     """The hide and seek scene."""
 
     def __init__(self):

@@ -25,6 +25,7 @@ setuptools.setup(
                   "mandelbrot = funkode.apps.mandelbrot:main",
                   "raycasting = funkode.apps.raycasting:main",
                   "hide-and-seek = funkode.apps.hide_and_seek:main",
+                  "generate-maze = funkode.apps.generate_maze:main",
               ],
           },
     install_requires=requirements,

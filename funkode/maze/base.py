@@ -1,5 +1,4 @@
 """Base classes for mazes."""
-import numpy as np
 
 
 class MazeCell:
@@ -55,12 +54,6 @@ class MazeCell:
         return [nb for nb in self.inactive_neighbors if not nb.is_on_edge]
 
     @property
-    def shuffled_inner_inactive_neighbors(self):
-        neighbors = self.inner_inactive_neighbors
-        np.random.shuffle(neighbors)
-        return neighbors
-
-    @property
     def walls(self):
         walls = [
             self.north_wall,
@@ -68,6 +61,18 @@ class MazeCell:
             self.south_wall,
             self.west_wall,
         ]
+        return walls
+
+    @property
+    def active_walls(self):
+        return [wall for wall in self.walls if wall.active]
+
+    @property
+    def inner_active_walls(self):
+        walls = []
+        for wall in self.active_walls:
+            if len(wall.adjacent_cells) > 1:
+                walls.append(wall)
         return walls
 
     def get_opposite_neighbor(self, neighbor):
@@ -82,6 +87,19 @@ class MazeCell:
         else:
             opposite_neighbor = self.east_neighbor
         return opposite_neighbor
+
+    def get_wall_position(self, wall):
+        if wall not in self.walls:
+            raise ValueError("Given wall is not adjacent to this cell.")
+        if wall is self.north_wall:
+            wall_position = "north"
+        elif wall is self.east_wall:
+            wall_position = "east"
+        elif wall is self.south_wall:
+            wall_position = "south"
+        else:
+            wall_position = "west"
+        return wall_position
 
     def move_to(self, target_cell, target_wall):
         if target_cell is None or not target_cell.active or target_wall.active:
@@ -112,6 +130,14 @@ class MazeWall:
     @property
     def adjacent_cells(self):
         return [cell for cell in [self.cell1, self.cell2] if cell is not None]
+
+    @property
+    def active_adjacent_cells(self):
+        return [cell for cell in self.adjacent_cells if cell.active]
+
+    @property
+    def inactive_adjacent_cells(self):
+        return [cell for cell in self.adjacent_cells if not cell.active]
 
 
 class AbstractMaze:
@@ -187,7 +213,8 @@ class GrowingMaze(AbstractMaze):
         """Update the maze a single step."""
         if not self.steps:
             return
-        self.steps.pop(0).apply(self)
+        step = self.steps.pop(0)
+        step.apply(self)
 
     def mature(self):
         """Fully mature the maze by exhausting its list of steps."""

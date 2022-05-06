@@ -6,16 +6,16 @@ import funkode.core.scene
 
 FRAMERATE = 60
 
-MAZE_WIDTH = 59
-MAZE_HEIGHT = 39
-CELL_WIDTH = 15
-CELL_HEIGHT = 15
+MAZE_WIDTH = 29
+MAZE_HEIGHT = 19
+CELL_WIDTH = 30
+CELL_HEIGHT = 30
 
 SCREEN_SIZE = (MAZE_WIDTH*CELL_WIDTH, MAZE_HEIGHT*CELL_HEIGHT)
 
 WALL_COLOR = pygame.Color("black")
 FLOOR_COLOR = pygame.Color("white")
-WALL_WIDTH = 1
+WALL_WIDTH = 5
 ANIMATE=True
 
 
@@ -72,6 +72,10 @@ class MazeGeneratorScene(funkode.core.scene.Scene):
                 self.skip_animation()
             if event.key == pygame.K_t:
                 self.toggle_animation()
+            if event.key == pygame.K_RIGHT:
+                self.transition_to_next_scene()
+            if event.key == pygame.K_LEFT:
+                self.transition_to_previous_scene()
 
     def update(self):
         self.drawn_maze.update()
@@ -93,16 +97,52 @@ class MazeGeneratorScene(funkode.core.scene.Scene):
         if not self.animate:
             self.drawn_maze.mature()
 
+    def transition_to_next_scene(self):
+        pass
+
+    def transition_to_previous_scene(self):
+        pass
+
+
+class PrimMazeScene(MazeGeneratorScene):
+    """The Prim Maze Scene."""
+
+    def __init__(self, animate=ANIMATE):
+        super().__init__(funkode.maze.prim.PrimMaze, animate)
+
+    def transition_to_next_scene(self):
+        scene = AdvancedPrimMazeScene(self.animate)
+        self.context.transition_to(scene)
+
+    def transition_to_previous_scene(self):
+        scene = AdvancedPrimMazeScene(self.animate)
+        self.context.transition_to(scene)
+
+
+class AdvancedPrimMazeScene(MazeGeneratorScene):
+    """The Advanced Prim Maze Scene."""
+
+    def __init__(self, animate=ANIMATE):
+        super().__init__(funkode.maze.prim.AdvancedPrimMaze, animate)
+
+    def transition_to_next_scene(self):
+        scene = PrimMazeScene(self.animate)
+        self.context.transition_to(scene)
+
+    def transition_to_previous_scene(self):
+        scene = PrimMazeScene(self.animate)
+        self.context.transition_to(scene)
+
 
 def main():
     """Main script execution function."""
     # Initialize some PyGame stuff.
     pygame.init()
     screen = pygame.display.set_mode(SCREEN_SIZE)
-    pygame.display.set_caption("Hide and Seek")
+    pygame.display.set_caption("Maze Generator")
 
     # Set up the scene.
-    scene = MazeGeneratorScene(funkode.maze.prim.PrimMaze)
+    scene = PrimMazeScene()
     # Initialize and run the game.
     game = funkode.core.scene.SceneContext(scene, FRAMERATE)
     game.run(screen)

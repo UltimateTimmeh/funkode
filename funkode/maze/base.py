@@ -101,6 +101,19 @@ class MazeCell:
             wall_position = "west"
         return wall_position
 
+    def get_wall_between(self, neighbor):
+        if neighbor not in self.neighbors:
+            raise ValueError("Given cell is not a neighbor of this cell.")
+        if neighbor is self.north_neighbor:
+            wall = self.north_wall
+        elif neighbor is self.east_neighbor:
+            wall = self.east_wall
+        elif neighbor is self.south_neighbor:
+            wall = self.south_wall
+        else:
+            wall = self.west_wall
+        return wall
+
     def move_to(self, target_cell, target_wall):
         if target_cell is None or not target_cell.active or target_wall.active:
             target_cell = self

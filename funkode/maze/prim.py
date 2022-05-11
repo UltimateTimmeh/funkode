@@ -86,8 +86,8 @@ class AdvancedPrimMaze(AbstractMaze):
         ## Fulfilled by initialization of base class.
         # Step 2: Pick a random cell.
         rng = np.random.default_rng()
-        first_x = rng.choice(range(1, self.width-1, 2))
-        first_y = rng.choice(range(1, self.height-1, 2))
+        first_x = rng.choice(range(self.width))
+        first_y = rng.choice(range(self.height))
         first_cell = self.cells[first_x][first_y]
         # Step 3 : Activate that cell.
         action = GrowAction("activate", (first_x, first_y))

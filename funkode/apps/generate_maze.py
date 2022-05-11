@@ -1,13 +1,14 @@
 """Watch mazes grow automatically."""
 import pygame
 
+import funkode.maze.depth
 import funkode.maze.prim
 import funkode.core.scene
 
 FRAMERATE = 60
 
-MAZE_WIDTH = 29
-MAZE_HEIGHT = 19
+MAZE_WIDTH = 33
+MAZE_HEIGHT = 23
 CELL_WIDTH = 30
 CELL_HEIGHT = 30
 
@@ -104,17 +105,47 @@ class MazeGeneratorScene(funkode.core.scene.Scene):
         pass
 
 
+class DepthMazeScene(MazeGeneratorScene):
+    """The Depth Maze Scene."""
+
+    def __init__(self, animate=ANIMATE):
+        super().__init__(funkode.maze.depth.DepthMaze, animate)
+
+    def transition_to_previous_scene(self):
+        scene = AdvancedPrimMazeScene(self.animate)
+        self.context.transition_to(scene)
+
+    def transition_to_next_scene(self):
+        scene = PrimMazeScene(self.animate)
+        self.context.transition_to(scene)
+
+
 class PrimMazeScene(MazeGeneratorScene):
     """The Prim Maze Scene."""
 
     def __init__(self, animate=ANIMATE):
         super().__init__(funkode.maze.prim.PrimMaze, animate)
 
-    def transition_to_next_scene(self):
-        scene = AdvancedPrimMazeScene(self.animate)
+    def transition_to_previous_scene(self):
+        scene = DepthMazeScene(self.animate)
         self.context.transition_to(scene)
 
+    def transition_to_next_scene(self):
+        scene = AdvancedDepthMazeScene(self.animate)
+        self.context.transition_to(scene)
+
+
+class AdvancedDepthMazeScene(MazeGeneratorScene):
+    """The Advanced Depth Maze Scene."""
+
+    def __init__(self, animate=ANIMATE):
+        super().__init__(funkode.maze.depth.AdvancedDepthMaze, animate)
+
     def transition_to_previous_scene(self):
+        scene = PrimMazeScene(self.animate)
+        self.context.transition_to(scene)
+
+    def transition_to_next_scene(self):
         scene = AdvancedPrimMazeScene(self.animate)
         self.context.transition_to(scene)
 
@@ -125,12 +156,12 @@ class AdvancedPrimMazeScene(MazeGeneratorScene):
     def __init__(self, animate=ANIMATE):
         super().__init__(funkode.maze.prim.AdvancedPrimMaze, animate)
 
-    def transition_to_next_scene(self):
-        scene = PrimMazeScene(self.animate)
+    def transition_to_previous_scene(self):
+        scene = AdvancedDepthMazeScene(self.animate)
         self.context.transition_to(scene)
 
-    def transition_to_previous_scene(self):
-        scene = PrimMazeScene(self.animate)
+    def transition_to_next_scene(self):
+        scene = DepthMazeScene(self.animate)
         self.context.transition_to(scene)
 
 
@@ -142,7 +173,7 @@ def main():
     pygame.display.set_caption("Maze Generator")
 
     # Set up the scene.
-    scene = PrimMazeScene()
+    scene = DepthMazeScene()
     # Initialize and run the game.
     game = funkode.core.scene.SceneContext(scene, FRAMERATE)
     game.run(screen)

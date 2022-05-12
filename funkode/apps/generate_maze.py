@@ -2,13 +2,14 @@
 import pygame
 
 import funkode.maze.depth
+import funkode.maze.kruskal
 import funkode.maze.prim
 import funkode.core.scene
 
 FRAMERATE = 60
 
-MAZE_WIDTH = 33
-MAZE_HEIGHT = 23
+MAZE_WIDTH = 31
+MAZE_HEIGHT = 21
 CELL_WIDTH = 30
 CELL_HEIGHT = 30
 
@@ -116,6 +117,21 @@ class DepthMazeScene(MazeGeneratorScene):
         self.context.transition_to(scene)
 
     def transition_to_next_scene(self):
+        scene = KruskalMazeScene(self.animate)
+        self.context.transition_to(scene)
+
+
+class KruskalMazeScene(MazeGeneratorScene):
+    """The Kruskal Maze Scene."""
+
+    def __init__(self, animate=ANIMATE):
+        super().__init__(funkode.maze.kruskal.KruskalMaze, animate)
+
+    def transition_to_previous_scene(self):
+        scene = DepthMazeScene(self.animate)
+        self.context.transition_to(scene)
+
+    def transition_to_next_scene(self):
         scene = PrimMazeScene(self.animate)
         self.context.transition_to(scene)
 
@@ -127,7 +143,7 @@ class PrimMazeScene(MazeGeneratorScene):
         super().__init__(funkode.maze.prim.PrimMaze, animate)
 
     def transition_to_previous_scene(self):
-        scene = DepthMazeScene(self.animate)
+        scene = KruskalMazeScene(self.animate)
         self.context.transition_to(scene)
 
     def transition_to_next_scene(self):
@@ -146,6 +162,21 @@ class AdvancedDepthMazeScene(MazeGeneratorScene):
         self.context.transition_to(scene)
 
     def transition_to_next_scene(self):
+        scene = AdvancedKruskalMazeScene(self.animate)
+        self.context.transition_to(scene)
+
+
+class AdvancedKruskalMazeScene(MazeGeneratorScene):
+    """The Advanced Kruskal Maze Scene."""
+
+    def __init__(self, animate=ANIMATE):
+        super().__init__(funkode.maze.kruskal.AdvancedKruskalMaze, animate)
+
+    def transition_to_previous_scene(self):
+        scene = AdvancedDepthMazeScene(self.animate)
+        self.context.transition_to(scene)
+
+    def transition_to_next_scene(self):
         scene = AdvancedPrimMazeScene(self.animate)
         self.context.transition_to(scene)
 
@@ -157,7 +188,7 @@ class AdvancedPrimMazeScene(MazeGeneratorScene):
         super().__init__(funkode.maze.prim.AdvancedPrimMaze, animate)
 
     def transition_to_previous_scene(self):
-        scene = AdvancedDepthMazeScene(self.animate)
+        scene = AdvancedKruskalMazeScene(self.animate)
         self.context.transition_to(scene)
 
     def transition_to_next_scene(self):

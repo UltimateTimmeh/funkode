@@ -38,6 +38,8 @@ class PrimMaze(AbstractMaze):
                     GrowAction("deactivate", (x, y), "south"),
                     GrowAction("deactivate", (x, y), "west"),
                 ]
+                for wall in self.cells[x][y].walls:
+                    wall.active = False
         self.steps.append(GrowStep(actions))
         # Step 2: Pick a random cell.
         rng = np.random.default_rng()

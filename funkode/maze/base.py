@@ -69,11 +69,7 @@ class MazeCell:
 
     @property
     def inner_active_walls(self):
-        walls = []
-        for wall in self.active_walls:
-            if len(wall.adjacent_cells) > 1:
-                walls.append(wall)
-        return walls
+        return [wall for wall in self.active_walls if wall.is_inner]
 
     def get_opposite_neighbor(self, neighbor):
         if neighbor not in self.neighbors:
@@ -152,6 +148,10 @@ class MazeWall:
     def inactive_adjacent_cells(self):
         return [cell for cell in self.adjacent_cells if not cell.active]
 
+    @property
+    def is_inner(self):
+        return len(self.adjacent_cells) == 2
+
 
 class AbstractMaze:
     """Abstract base class for mazes."""
@@ -213,6 +213,20 @@ class AbstractMaze:
 
     def _generate(self):
         pass
+
+    @property
+    def walls(self):
+        """list[MazeWall]: The list of all walls in the maze."""
+        walls = []
+        for x in range(self.width):
+            for y in range(self.height):
+                walls += self.cells[x][y].walls
+        return walls
+
+    @property
+    def inner_walls(self):
+        """list[MazeWall]: The list of inner walls in the maze."""
+        return [wall for wall in self.walls if wall.is_inner]
 
 
 class GrowingMaze(AbstractMaze):

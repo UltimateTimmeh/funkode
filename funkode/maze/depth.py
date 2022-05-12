@@ -37,6 +37,8 @@ class DepthMaze(AbstractMaze):
                     GrowAction("deactivate", (x, y), "south"),
                     GrowAction("deactivate", (x, y), "west"),
                 ]
+                for wall in self.cells[x][y].walls:
+                    wall.active = False
         self.steps.append(GrowStep(actions))
         # # Step 1: Pick a random cell. Activate it and push it to the stack.
         rng = np.random.default_rng()
